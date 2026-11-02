@@ -1,5 +1,7 @@
 # circuit-prometheus
 
+[![Conn3x grade](https://conn3x.org/circuits/prometheus/grade.svg)](https://conn3x.org/circuits/prometheus/grade)
+
 A Conn3x circuit that installs a [Prometheus](https://prometheus.io) server on your hosts and keeps it running. It downloads a pinned release, checks its SHA-256 before using it, and runs it under systemd as its own `prometheus` user. You give it the targets to scrape, the scrape interval and how long to keep data, and it writes `/etc/prometheus/prometheus.yml` from them.
 
 A config change doesn't restart Prometheus. The circuit checks the new file with `promtool` first, puts it in place only if it passes, and then reloads Prometheus, so scraping carries on and a typo never reaches the running server.
@@ -8,7 +10,7 @@ A config change doesn't restart Prometheus. The circuit checks the new file with
 
 ```hcl
 module "node_exporter" {
-  source = "github.com/conn3xorg/circuit-node-exporter?ref=v0.1.0"
+  source = "github.com/conn3xorg/circuit-node-exporter?ref=v0.1.1"
 
   hosts                = { web1 = "203.0.113.10", web2 = "203.0.113.11" }
   ssh_private_key_file = "~/.ssh/id_ed25519"
