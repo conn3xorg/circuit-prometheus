@@ -72,7 +72,7 @@ jobs:
           conn3x plan -detailed-exitcode
       # node_exporter from circuit-node-exporter is the node job's target.
       - name: Check Prometheus scrapes node_exporter
-        run: |
+        run: &scrape |
           podman exec -i circuit-prometheus sh -eu <<'EOF'
           t='localhost:9090/api/v1/targets?state=active'
           up='"scrapeUrl":"http://localhost:9100/metrics"[^}]*"health":"up"'
@@ -92,6 +92,19 @@ jobs:
           conn3x plan -detailed-exitcode -var scrape_interval=20s
           [ "$(podman exec circuit-prometheus systemctl show -P MainPID prometheus)" = "$pid" ]
           podman exec circuit-prometheus curl -sf localhost:9090/api/v1/status/config | grep -q 'scrape_interval: 20s'
+      # Restarting the container boots systemd again, so this checks both
+      # services are enabled and come back with the config on disk.
+      - name: Restart the host, then check Prometheus kept its config
+        run: |
+          podman restart circuit-prometheus
+          podman exec circuit-prometheus timeout 60 systemctl is-system-running --wait || true
+          for _ in $(seq 30); do
+            podman exec circuit-prometheus curl -sf localhost:9090/api/v1/status/config | grep -q 'scrape_interval: 20s' && break
+            sleep 1
+          done
+          podman exec circuit-prometheus curl -sf localhost:9090/api/v1/status/config | grep -q 'scrape_interval: 20s'
+      - name: Check Prometheus scrapes node_exporter after the restart
+        run: *scrape
       - name: Clean up
         if: always()
         working-directory: examples/local
