@@ -17,7 +17,7 @@ module "node_exporter" {
 }
 
 module "prometheus" {
-  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.1.0"
+  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.1.1"
 
   hosts                = { mon1 = "203.0.113.20" }
   ssh_private_key_file = "~/.ssh/id_ed25519"
@@ -87,7 +87,7 @@ Set `prometheus_version` and `checksums` together. Take both checksums from the 
 
 ```hcl
 module "prometheus" {
-  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.1.0"
+  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.1.1"
 
   hosts              = { mon1 = "203.0.113.20" }
   prometheus_version = "3.15.1"
