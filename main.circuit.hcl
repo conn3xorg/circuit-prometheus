@@ -86,6 +86,16 @@ circuit "prometheus" {
     }
   }
 
+  # mkdir would make /opt/prometheus with the login session's umask, and
+  # under circuit-hardening's 027 the prometheus user couldn't reach its
+  # binary.
+  step "opt_dir" {
+    directory {
+      path = "/opt/prometheus"
+      mode = "0755"
+    }
+  }
+
   step "download" {
     download {
       url    = "https://github.com/prometheus/prometheus/releases/download/v${var.prometheus_version}/${local.release[each.key]}.tar.gz"
