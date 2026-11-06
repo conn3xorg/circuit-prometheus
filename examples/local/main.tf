@@ -14,7 +14,7 @@ locals {
 
 # Something to scrape: node_exporter on the same host, from its own circuit.
 module "node_exporter" {
-  source = "github.com/conn3xorg/circuit-node-exporter?ref=v0.1.1"
+  source = "github.com/conn3xorg/circuit-node-exporter?ref=v0.1.3"
 
   hosts                = local.hosts
   ssh_port             = var.port
