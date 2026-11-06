@@ -10,14 +10,14 @@ A config change doesn't restart Prometheus. The circuit checks the new file with
 
 ```hcl
 module "node_exporter" {
-  source = "github.com/conn3xorg/circuit-node-exporter?ref=v0.1.1"
+  source = "github.com/conn3xorg/circuit-node-exporter?ref=v0.1.3"
 
   hosts                = { web1 = "203.0.113.10", web2 = "203.0.113.11" }
   ssh_private_key_file = "~/.ssh/id_ed25519"
 }
 
 module "prometheus" {
-  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.1.1"
+  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.1.2"
 
   hosts                = { mon1 = "203.0.113.20" }
   ssh_private_key_file = "~/.ssh/id_ed25519"
@@ -87,7 +87,7 @@ Set `prometheus_version` and `checksums` together. Take both checksums from the 
 
 ```hcl
 module "prometheus" {
-  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.1.1"
+  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.1.2"
 
   hosts              = { mon1 = "203.0.113.20" }
   prometheus_version = "3.15.1"
