@@ -164,8 +164,8 @@ circuit "prometheus" {
   # handler because handlers run after every step, and the ready check below
   # has to see Prometheus running with the new unit.
   step "restart" {
-    command {
-      command  = "systemctl daemon-reload && systemctl restart prometheus"
+    service_action {
+      name     = "prometheus"
       triggers = { unit = conn3x_file.prometheus__unit[each.key].revision }
     }
   }
