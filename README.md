@@ -17,7 +17,7 @@ module "node_exporter" {
 }
 
 module "prometheus" {
-  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.2.0"
+  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.3.0"
 
   hosts                = { mon1 = "203.0.113.20" }
   ssh_private_key_file = "~/.ssh/id_ed25519"
@@ -64,7 +64,7 @@ On each host, in order:
 1. Installs `curl`, `tar` and `gzip` if they're missing.
 2. Creates the `prometheus` system user, with no login shell, and its data directory, `/var/lib/prometheus`.
 3. Downloads `prometheus-VERSION.linux-ARCH.tar.gz` from the GitHub release into `/opt/prometheus`. If the checksum doesn't match `checksums`, the apply fails and nothing is unpacked. Then unpacks it to `/opt/prometheus/prometheus-VERSION.linux-ARCH/`.
-4. Writes the configuration to `/etc/prometheus/prometheus.yml.conn3x`, runs `promtool check config` on it and, when that passes, copies it to `/etc/prometheus/prometheus.yml`. If Prometheus is already running, it reloads it with `systemctl reload`, which sends it `SIGHUP`. If `promtool` fails, the apply stops there and the live file stays as it was.
+4. Writes the configuration to `/etc/prometheus/prometheus.yml`, through a temporary file that `promtool check config` checks first. If `promtool` fails, the apply stops there and the live file stays as it was. If Prometheus is already running, it reloads it, which sends it `SIGHUP`.
 5. Writes `/etc/systemd/system/prometheus.service`, and restarts Prometheus when that file changes.
 6. Starts Prometheus now and at boot, and waits until it answers on `/-/ready`.
 
@@ -87,7 +87,7 @@ Set `prometheus_version` and `checksums` together. Take both checksums from the 
 
 ```hcl
 module "prometheus" {
-  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.2.0"
+  source = "github.com/conn3xorg/circuit-prometheus?ref=v0.3.0"
 
   hosts              = { mon1 = "203.0.113.20" }
   prometheus_version = "3.15.1"
@@ -127,7 +127,7 @@ The new release unpacks beside the old one, the unit file points at it, and Prom
 
 ## Requirements
 
-Requires Conn3x v0.28.0 or later, systemd on each host, and outbound HTTPS to github.com.
+Requires Conn3x v0.30.0 or later, systemd on each host, and outbound HTTPS to github.com.
 
 ## Tested on
 
