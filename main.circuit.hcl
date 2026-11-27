@@ -20,9 +20,6 @@ locals {
   bin     = { for name, r in local.release : name => "/opt/prometheus/${r}" }
 
   config_file = "/etc/prometheus/prometheus.yml"
-  # promtool checks this copy before it replaces the live file, so a config
-  # Prometheus would reject never reaches it.
-  staged_file = "/etc/prometheus/prometheus.yml.conn3x"
   data_dir    = "/var/lib/prometheus"
 
   listen_host = regex("^(.*):[0-9]+$", var.listen_address)[0]
@@ -118,19 +115,24 @@ circuit "prometheus" {
     }
   }
 
-  step "staged" {
+  # promtool checks the new file before it goes live; a config it rejects
+  # leaves the running one as it was and fails the apply.
+  step "config" {
     file {
-      path    = local.staged_file
-      content = local.config
+      path     = local.config_file
+      content  = local.config
+      mode     = "0644"
+      validate = "${local.bin[each.key]}/promtool check config %s"
     }
   }
 
-  # Checks the staged copy, puts it live and reloads Prometheus if it's
-  # running. On the first apply it isn't yet, and starts with this file.
-  step "config" {
-    command {
-      command = "${local.bin[each.key]}/promtool check config ${local.staged_file} && install -m 644 ${local.staged_file} ${local.config_file} && if systemctl -q is-active prometheus; then systemctl reload prometheus; fi"
-      unless  = "echo '${sha256(local.config)}  ${local.config_file}' | sha256sum -c --status"
+  # Reloads Prometheus when the config changed and it's running. On the
+  # first apply it isn't yet, and starts with this file.
+  step "reload" {
+    service_action {
+      name     = "prometheus"
+      action   = "try-reload"
+      triggers = { config = conn3x_file.prometheus__config[each.key].revision }
     }
   }
 
